@@ -33,13 +33,13 @@ class MyUserManager(BaseUserManager):
         
     
 class User(AbstractBaseUser,PermissionsMixin):
-    first_name = models.CharField (_("firstname"),max_length=150,Blank=True)
-    last_name = models.CharField (_("lastname"),max_length=150,Blank=True)
+    first_name = models.CharField (_("firstname"),max_length=150,blank=True)
+    last_name = models.CharField (_("lastname"),max_length=150,blank=True)
     email=models.EmailField(_("email"),unique=True)
-    mobile=models.CharField(_("mobile"),unique=True,blank=True,null=True)
+    mobile=models.CharField(_("mobile"),max_length=11,unique=True,blank=True,null=True)
     is_staff=models.BooleanField(_("staff status"),default=False,help_text=_('show that user can login to panel admin or not'))
     is_active=models.BooleanField(_('active'),default=False,help_text=_('show that user can log in to website or not!'))
-    date_joined=models.DateTimeField(_("date_joined"),default=timezone.now())
+    date_joined=models.DateTimeField(_("date_joined"),default=timezone.now)
     objects=MyUserManager()
     
     EMAIL_FIELD='email'
