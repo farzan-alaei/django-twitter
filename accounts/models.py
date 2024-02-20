@@ -25,6 +25,7 @@ class MyUserManager(BaseUserManager):
     def create_superuser(self,  email, password=None, **others_fields):
         others_fields.setdefault("is_staff", True)
         others_fields.setdefault("is_superuser", True)
+        others_fields.setdefault("is_active",True)
         if others_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")
         if others_fields.get("is_superuser") is not True:
@@ -40,6 +41,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(_("staff status"),default=False,help_text=_('show that user can login to panel admin or not'))
     is_active=models.BooleanField(_('active'),default=False,help_text=_('show that user can log in to website or not!'))
     date_joined=models.DateTimeField(_("date_joined"),default=timezone.now)
+    image=models.ImageField(_('image'),blank=True)
     objects=MyUserManager()
     
     EMAIL_FIELD='email'
