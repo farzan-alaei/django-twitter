@@ -70,3 +70,10 @@ class User(AbstractBaseUser,PermissionsMixin):
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+class UserFollowing(models.Model):
+    
+    
+    user_id=models.ForeignKey(User,verbose_name=_("following"),related_name='following',on_delete=models.CASCADE)
+    
+    following_user_id=models.ForeignKey(User,verbose_name=_("followers"),related_name='followers',on_delete=models.CASCADE)
