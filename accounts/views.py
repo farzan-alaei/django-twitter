@@ -25,6 +25,7 @@ from django.views.generic.edit import UpdateView
 
 
 User = get_user_model()
+
 class UserUpdateView(UpdateView):
     model = User
     fields = ['mobile','first_name','last_name']
@@ -71,13 +72,10 @@ class RegisterView(CreateView):
                     print('form is valid !')
             
                     new_user=form.save(commit=False)
-                    print(new_user)
                     new_user.is_active=False
                     new_user.save()
                     # template=get_template("acc_active_email.html")
                     token=account_activation_token.make_token(new_user)
-                    print(user)   
-                    print(new_user.pk)
                     uid = urlsafe_base64_encode(force_bytes(new_user.pk))
                     current_site = get_current_site(request)
                     context={
@@ -97,14 +95,9 @@ class active_user(View):
     def get (self,request,uidb64,token):
         try :
             uid = force_str(urlsafe_base64_decode(uidb64))
-            print(uid)
             user=get_user_model().objects.get(pk=uid)
-            print(user)
-            print(token)
-            print(account_activation_token.make_token(user))
             if user is not None and account_activation_token.check_token(user,token):
                 user.is_active=True
-                print('hi')
                 user.save()
                 return render(request,'accounts/email_confirm.html')        
         except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
@@ -130,12 +123,7 @@ class UserProfileDetailView(DetailView):
             return render(request,template_name='accounts/profile.html',context=context)
         else : 
             return HttpResponse('you are not allow to see here :)')
-        
-    # def post(self,request):
-    #     return render(request,'accounts/profile.html')
-    # def get_context_data(self,*args, **kwargs):
-    #      return super().get_context_data(**kwargs)
-     
+             
 def user_info (request):
     return render(request,'accounts/profile.html',{
         'user':request.user
