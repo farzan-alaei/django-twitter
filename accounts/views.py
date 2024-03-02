@@ -1,5 +1,5 @@
 from email.message import EmailMessage
-from django.shortcuts import render,redirect,HttpResponse
+from django.shortcuts import get_object_or_404, render,redirect,HttpResponse
 from django.views.generic import DetailView,View
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
@@ -17,46 +17,39 @@ from base64 import urlsafe_b64encode
 from .tokens import account_activation_token
 from django.conf import settings
 from .models import User
-from .forms import UserForm,RegisterForm
-# Create your views here.
+from .forms import LoginForm,RegisterForm
+from django.utils.encoding import force_str
+from django.contrib.auth.backends import ModelBackend
 
-user=get_user_model()
+from django.views.generic.edit import UpdateView
 
-class Login(View):
-    template_name="accounts/Login.html"
-    form_class=UserForm
+
+User = get_user_model()
+class UserUpdateView(UpdateView):
+    model = User
+    fields = ['mobile','first_name','last_name']
+    template_name_suffix = "update_form"
+
+class LoginView(View):
+    template_name='login.html'
+    form_class = LoginForm
+    
     def get(self,request):
-        if request.user.is_authenticated:
-            return HttpResponse('u are login now')
-        else:
-            form=self.form_class()
-            return render(request,self.template_name,{'form':form})
+        form=self.form_class
+        return render(request,'accounts/login.html',{'form':form})
         
     def post(self,request):
         form=self.form_class(request.POST)
         if form.is_valid():
-            # user=form.cleaned_data['user']
-            # print(user)
-            # login(request,user=user)
-            username = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            print(form)
-            user = authenticate(request,username=username,password=password)
-            print(user)
-            if user is not None:
-                print(user)                    
-                login(request, user)
-                # messages.success(request,f'Hi {username.title()}, welcome back!')
-                # return redirect('posts')
+            print('form is valid')
+            user=form.cleaned_data.get('user')
+            print(user.pk)
+            login(request,user)
+        else :
+            return render(request,'accounts/login.html',{'form':form})
+        return redirect('accounts:profile',pk=user.pk)
             
-                return HttpResponse("you login")
-            elif user is None :
-                return HttpResponse("user does not exist")
-        else:
-            print(form.is_valid)
-            print(form.errors)
-            return HttpResponse(":D")
-    
+
 class RegisterView(CreateView):
     form_class = RegisterForm
     success_url = reverse_lazy('login')
@@ -65,20 +58,27 @@ class RegisterView(CreateView):
         if request.user.is_authenticated:
             return redirect("accounts:login")
         else:
-            form=RegisterForm
+            form=self.form_class
             return render(request,'accounts/signup.html',context={'form':form})
         
     def post(self,request):
         email_from = settings.EMAIL_HOST_USER
         subject="Welcome To Django Twitter"
-        form=RegisterForm(request.POST)
+        form=self.form_class(request.POST)
+        print(form.errors)
         if form.is_valid:
+            
+                    print('form is valid !')
+            
                     new_user=form.save(commit=False)
+                    print(new_user)
                     new_user.is_active=False
                     new_user.save()
                     # template=get_template("acc_active_email.html")
-                    token=account_activation_token.make_token(new_user)    
-                    uid = urlsafe_b64encode(force_bytes(user.pk))   
+                    token=account_activation_token.make_token(new_user)
+                    print(user)   
+                    print(new_user.pk)
+                    uid = urlsafe_base64_encode(force_bytes(new_user.pk))
                     current_site = get_current_site(request)
                     context={
                     'user': new_user,
@@ -91,10 +91,54 @@ class RegisterView(CreateView):
                     mail.send_mail(subject,plain_message,email_from,[new_user.email],html_message=html_message)
                     status=200
                     return HttpResponse('check your email for verification check spam folder too')
-        else:
-                    messages.error(request, 'Error')
-                    status = 400
-                    return HttpResponse("ur register has an error")
-                
-def emailconfirm(request):
-    return render(request,'signed_up.html')
+        else :
+            return render(request,'accounts/signup.html',{'form':form},status=status)              
+class active_user(View):
+    def get (self,request,uidb64,token):
+        try :
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            print(uid)
+            user=get_user_model().objects.get(pk=uid)
+            print(user)
+            print(token)
+            print(account_activation_token.make_token(user))
+            if user is not None and account_activation_token.check_token(user,token):
+                user.is_active=True
+                print('hi')
+                user.save()
+                return render(request,'accounts/email_confirm.html')        
+        except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
+            user=None
+            print('its nokey')  
+            return HttpResponse('404')
+        
+
+class UserProfileDetailView(DetailView):
+    model=User
+    template_name="accounts/profile.html"
+    context_object_name='profile'
+    
+    def get(self,request,pk):
+        if not request.user.is_authenticated:
+            return redirect('accounts:login')
+        if request.user.pk==int(pk):
+            user = get_object_or_404(User, pk=int(pk))
+            context ={
+                'user':user,
+            }
+            
+            return render(request,template_name='accounts/profile.html',context=context)
+        else : 
+            return HttpResponse('you are not allow to see here :)')
+        
+    # def post(self,request):
+    #     return render(request,'accounts/profile.html')
+    # def get_context_data(self,*args, **kwargs):
+    #      return super().get_context_data(**kwargs)
+     
+def user_info (request):
+    return render(request,'accounts/profile.html',{
+        'user':request.user
+    })
+
+     
