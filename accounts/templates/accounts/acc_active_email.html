@@ -1,1 +1,9 @@
-{{token}}
+<p>Hi {{ user.first_name }},</p>
+
+<p>Thanks for signing up. To activate your account, click the link below:</p>
+
+<p><a href="http://{{ domain }}{% url 'accounts:activate' uidb64=uid token=token %}">Activate now</a></p>
+
+<p>Thanks,</p>
+
+<p>Your Team</p>
