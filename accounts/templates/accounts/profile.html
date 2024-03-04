@@ -1,3 +1,10 @@
-{{profile}}
-{{profile.mobile}}
-{{profile.first_name}}
+
+<p>Username:</p>
+    {{user}}
+
+<h2>
+    <p>Followers</p>
+    <a href="{% url 'accounts:profile' retrieved.pk %}">{{follow.following_user_id}}</a>
+
+</h2>
+
