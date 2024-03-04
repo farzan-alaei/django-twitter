@@ -41,6 +41,7 @@ class MyUserManager(BaseUserManager):
         return user        
     
 class User(AbstractBaseUser,PermissionsMixin):
+    username=models.CharField(_('username'),max_length=150,unique=True)
     first_name = models.CharField (_("firstname"),max_length=150,blank=True)
     last_name = models.CharField (_("lastname"),max_length=150,blank=True)
     email=models.EmailField(_("email"),unique=True)
@@ -49,6 +50,8 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_active=models.BooleanField(_('active'),default=False,help_text=_('show that user can log in to website or not!'))
     date_joined=models.DateTimeField(_("date_joined"),default=timezone.now)
     image=models.ImageField(_('image'),blank=True)
+    followers = models.ManyToManyField('self',related_name='follow',blank=True,symmetrical=False)
+    following = models.ManyToManyField('self', related_name='fellow',blank=True,symmetrical=False)
     
     objects=MyUserManager()
     
@@ -86,6 +89,8 @@ class User(AbstractBaseUser,PermissionsMixin):
 class UserFollowing(models.Model):
     
     
-    user_id=models.ForeignKey(User,verbose_name=_("following"),related_name='following',on_delete=models.CASCADE)
+    user_id=models.ForeignKey(User,verbose_name=_("followings"),related_name='f',on_delete=models.CASCADE)
     
-    following_user_id=models.ForeignKey(User,verbose_name=_("followers"),related_name='followers',on_delete=models.CASCADE)
+    following_user_id = models.ForeignKey("User",related_name='p',on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
