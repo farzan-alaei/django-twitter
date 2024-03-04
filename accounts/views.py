@@ -16,7 +16,7 @@ from django.utils.html import strip_tags
 from base64 import urlsafe_b64encode
 from .tokens import account_activation_token
 from django.conf import settings
-from .models import User
+from .models import User,UserFollowing
 from .forms import LoginForm,RegisterForm
 from django.utils.encoding import force_str
 from django.contrib.auth.backends import ModelBackend
@@ -69,7 +69,6 @@ class RegisterView(CreateView):
         print(form.errors)
         if form.is_valid:
             
-                    print('form is valid !')
             
                     new_user=form.save(commit=False)
                     new_user.is_active=False
@@ -114,19 +113,21 @@ class UserProfileDetailView(DetailView):
     def get(self,request,pk):
         if not request.user.is_authenticated:
             return redirect('accounts:login')
-        if request.user.pk==int(pk):
-            user = get_object_or_404(User, pk=int(pk))
-            context ={
+        # if request.user.pk==int(pk):
+        user = get_object_or_404(User, pk=int(pk))
+        followers=UserFollowing.objects.get(user_id=int(pk))
+        retrieved=User.objects.get(email=followers.following_user_id)
+        # print(userretrieve)
+        context ={
                 'user':user,
+                'follow':followers,
+                'retrieved':retrieved
+                
+                
             }
             
-            return render(request,template_name='accounts/profile.html',context=context)
-        else : 
-            return HttpResponse('you are not allow to see here :)')
-             
-def user_info (request):
-    return render(request,'accounts/profile.html',{
-        'user':request.user
-    })
+        return render(request,template_name='accounts/profile.html',context=context)
+        # else : 
+        #     return HttpResponse('you are not allow to see here :)')
+        
 
-     
