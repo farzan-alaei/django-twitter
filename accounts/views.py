@@ -115,19 +115,39 @@ class UserProfileDetailView(DetailView):
             return redirect('accounts:login')
         # if request.user.pk==int(pk):
         user = get_object_or_404(User, pk=int(pk))
-        followers=UserFollowing.objects.get(user_id=int(pk))
-        retrieved=User.objects.get(email=followers.following_user_id)
+        followers=UserFollowing.objects.filter(following_user_id=int(pk))
+        following=UserFollowing.objects.filter(user_id=int(pk))
+
+        print(following.exists())
+        # retrieved=User.objects.get(email=followers.following_user_id)
         # print(userretrieve)
         context ={
                 'user':user,
-                'follow':followers,
-                'retrieved':retrieved
+                'following':following,
+                'followers':followers
+                # 'retrieved':retrieved
                 
                 
             }
-            
         return render(request,template_name='accounts/profile.html',context=context)
         # else : 
         #     return HttpResponse('you are not allow to see here :)')
         
+    def post (self,request,pk):
+        follower=request.user
+        following=User.objects.get(pk=pk)
+        new=UserFollowing.objects.create(user_id=follower,following_user_id=following)
+        new.save()
+        context={
+            
+        }
+        
+        return render(request,'accounts/profile.html',context)
 
+def follow_user(request,pk):
+    if request.method=='POST':
+        follower=request.user
+        following=User.objects.get(pk=pk)
+        new=UserFollowing.objects.create(user_id=follower,following_user_id=following)
+        new.save()
+        
