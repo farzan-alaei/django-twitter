@@ -20,6 +20,7 @@ from .models import User,UserFollowing
 from .forms import LoginForm,RegisterForm
 from django.utils.encoding import force_str
 from django.contrib.auth.backends import ModelBackend
+from chatapp.models import Room
 
 from django.views.generic.edit import UpdateView
 
@@ -114,17 +115,19 @@ class UserProfileDetailView(DetailView):
         if not request.user.is_authenticated:
             return redirect('accounts:login')
         # if request.user.pk==int(pk):
-        user = get_object_or_404(User, pk=int(pk))
+        username = get_object_or_404(User, pk=int(pk))
         followers=UserFollowing.objects.filter(following_user_id=int(pk))
         following=UserFollowing.objects.filter(user_id=int(pk))
-
-        print(following.exists())
+        related_user=UserFollowing.objects.select_related('user_id').all()
+        # print(User.objects.select_related('following_user_id').all())
         # retrieved=User.objects.get(email=followers.following_user_id)
         # print(userretrieve)
         context ={
-                'user':user,
+                'user':username,
+                'request_user':request.user,
                 'following':following,
-                'followers':followers
+                'followers':followers,
+                'related':related_user
                 # 'retrieved':retrieved
                 
                 
@@ -136,18 +139,22 @@ class UserProfileDetailView(DetailView):
     def post (self,request,pk):
         follower=request.user
         following=User.objects.get(pk=pk)
-        new=UserFollowing.objects.create(user_id=follower,following_user_id=following)
-        new.save()
-        context={
-            
-        }
-        
-        return render(request,'accounts/profile.html',context)
+        if UserFollowing.objects.filter(user_id=follower,following_user_id=following).exists():
+            UserFollowing.objects.get(user_id=follower,following_user_id=following).delete()
+            return render(request,'accounts/profile.html')
 
-def follow_user(request,pk):
+        else :
+            new=UserFollowing.objects.create(user_id=follower,following_user_id=following)
+            new.save()
+            context={
+                'new':new
+            }
+            
+            return render(request,'accounts/profile.html',context)
+
+def unfollow_user(request,pk):
     if request.method=='POST':
         follower=request.user
         following=User.objects.get(pk=pk)
         new=UserFollowing.objects.create(user_id=follower,following_user_id=following)
         new.save()
-        
