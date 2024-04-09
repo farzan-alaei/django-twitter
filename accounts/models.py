@@ -49,7 +49,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(_("staff status"),default=False,help_text=_('show that user can login to panel admin or not'))
     is_active=models.BooleanField(_('active'),default=False,help_text=_('show that user can log in to website or not!'))
     date_joined=models.DateTimeField(_("date_joined"),default=timezone.now)
-    image=models.ImageField(_('image'),blank=True)
+    image=models.ImageField(_('image'),blank=True,upload_to='images/')
     followers = models.ManyToManyField('self',related_name='follow',blank=True,symmetrical=False)
     following = models.ManyToManyField('self', related_name='fellow',blank=True,symmetrical=False)
     
@@ -90,7 +90,9 @@ class UserFollowing(models.Model):
     
     
     user_id=models.ForeignKey(User,verbose_name=_("followings"),related_name='f',on_delete=models.CASCADE)
+    # following
     
-    following_user_id = models.ForeignKey("User",related_name='p',on_delete=models.CASCADE)
+    following_user_id = models.ForeignKey("User",verbose_name=_('followers'),related_name='p',on_delete=models.CASCADE)
+    #followers
 
     created = models.DateTimeField(auto_now_add=True)
