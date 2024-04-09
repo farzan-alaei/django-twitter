@@ -1,0 +1,6 @@
+<h1>messages</h1>
+
+{% for direct in object_list  %}
+<p>{{direct.uid}}</p>
+<a href="{% url 'chatapp:room' room_name=direct.uid %}">direct.</a>
+{% endfor %}
