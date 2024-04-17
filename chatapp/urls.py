@@ -8,7 +8,7 @@ app_name='chatapp'
 urlpatterns = [
     
     path("", views.index, name="index"),
-    path("<str:room_name>/", views.room, name="room"),
     path('direct',views.DirectMessage.as_view(),name='messages'),
+    path("<str:room_name>", views.room, name="room"),
 
 ]
