@@ -138,10 +138,12 @@ class UserProfileDetailView(DetailView):
         
     def post (self,request,pk):
         follower=request.user
+        print(follower)
         following=User.objects.get(pk=pk)
+        print(following)
         if UserFollowing.objects.filter(user_id=follower,following_user_id=following).exists():
             UserFollowing.objects.get(user_id=follower,following_user_id=following).delete()
-            return render(request,'accounts/profile.html')
+            return redirect(to="accounts:profile",pk=pk)
 
         else :
             new=UserFollowing.objects.create(user_id=follower,following_user_id=following)
@@ -150,7 +152,7 @@ class UserProfileDetailView(DetailView):
                 'new':new
             }
             
-            return render(request,'accounts/profile.html',context)
+            return redirect(to="accounts:profile",pk=pk)
 
 def unfollow_user(request,pk):
     if request.method=='POST':
