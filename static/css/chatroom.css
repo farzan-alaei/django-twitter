@@ -1,0 +1,31 @@
+
+.chat-log {
+    /* Add styles for the chat log div */
+    border: 5px solid #ccc;
+    padding: 10px;
+    width: 100%;
+    background-color: #ADD8E6;
+    overflow-y: scroll; /* Add scrollbar if content overflows vertically */
+}
+
+.chat-sender {
+    font-size: small;
+    color: black;
+    font: bold;
+}
+
+
+
+.first_user {
+
+    font-size: large;
+    color: blue;
+    font: bold;
+}
+.second_user {
+    font-size: large;
+}
+
+#chat_message_input {
+    width: 100;
+}
