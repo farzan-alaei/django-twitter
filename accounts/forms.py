@@ -3,12 +3,22 @@ from django.contrib.auth.forms import AuthenticationForm,UserCreationForm,Userna
 from django.contrib.auth import authenticate
 from .models import User
 from django.conf import settings
-
+from django.forms import EmailInput,TextInput,PasswordInput
 
 class LoginForm(forms.Form):
-    email = forms.EmailField(required=True)
-    password = forms.CharField(widget=forms.PasswordInput)
 
+    email = forms.EmailField(required=True,widget=forms.EmailInput(attrs={
+                'class': "form-control", 
+                'style': 'max-width: 300px;',
+                'placeholder': 'Email'
+                }))
+    password = forms.CharField(required=True, widget=forms.PasswordInput({
+        
+                'class': "form-control",
+                'style': 'max-width: 300px;',
+                'placeholder': 'Password'
+                }))
+  
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get('email')

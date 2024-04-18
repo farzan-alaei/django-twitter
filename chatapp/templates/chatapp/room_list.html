@@ -1,6 +1,66 @@
-<h1>messages</h1>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
 
-{% for direct in object_list  %}
-<p>{{direct.uid}}</p>
-<a href="{% url 'chatapp:room' room_name=direct.uid %}">direct.</a>
+
+    <style>
+        body {
+            background-color: black;
+        }
+        .room_messages{
+            background-color: black;
+            color: red;
+        }
+
+        .name{
+            text-align: left;
+            font-size: xx-large;
+            color: white;
+        }
+        a:visited { /* Visited links */
+            color: white; /* Set the color of the text inside <a> tags */
+        }
+        a:link{
+            color : white;
+        }
+
+    </style>
+</head>
+<body>
+    
+
+<div class = "name">
+    Messages
+</div>
+
+
+
+
+
+
+{% if requested_user.pk == r.first_user %}
+
+
+{% for r in room  %}
+
+<div   class="room_messages">
+    <a href="{% url 'chatapp:room' room_name=r.uid %}">{{r.second_user}}</a>
+</div>
 {% endfor %}
+
+{% else %}
+<div    class="room_messages">
+
+    <a href="{% url 'chatapp:room' room_name=r.uid %}">{{r.first_user}}</a>
+</div>
+{% endif %}
+
+
+
+</body>
+</html>
+
+
+

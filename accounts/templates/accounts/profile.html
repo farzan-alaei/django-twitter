@@ -48,7 +48,8 @@
         <form action="{% url 'accounts:profile' user.pk %}" method="post">
             {% csrf_token %}
             <button type="button" class="btn btn-outline-primary">Unfollow</button>
-        
+            <input type="submit" value="unfollow">
+
         </form>
         
         {% else %}
@@ -56,7 +57,7 @@
         <form action="{% url 'accounts:profile' user.pk %}" method="post">
             {% csrf_token %}
             <input type="submit" value="follow">
-            <button type="button" class="btn btn-outline-primary">Follo</button>
+            <button type="button" class="btn btn-outline-primary">Follow</button>
         
         </form>
         {% endif %}
@@ -97,12 +98,12 @@
         console.log(userPK)
         console.log(request_user)
         if (userPK > request_user) {
-           var roomName = userPK.toString()+request_user
+           var roomName= '/chat/' + userPK + '/' + request_user
         }
         else {
-            var roomName =  request_user+ userPK.toString() ;
+            var roomName =  '/chat/' + request_user + '/' + userPK ;
         }
-        window.location.pathname = '/chat/' + roomName + '/';
+        window.location.pathname = roomName;
     };
 </script>
 </div>
