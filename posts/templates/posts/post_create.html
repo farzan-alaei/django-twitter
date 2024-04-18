@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Post Create</title>
+</head>
+<body>
+<h1>Create Post</h1>
+<form method="post" enctype="multipart/form-data" id="post-form">
+    {% csrf_token %}
+    {{ message }}
+    {{ form.as_p }}
+    <div id="image-forms">
+        <!-- اینجا تمام فرم‌های InlineFormSet به صورت پنهان قرار می‌گیرند -->
+        {{ image_formset.management_form }}
+        {% for form in image_formset %}
+        {{ form.as_p }}
+        {% endfor %}
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>
