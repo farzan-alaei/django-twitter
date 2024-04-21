@@ -6,8 +6,37 @@
 </head>
 <body>
 <h1>Post Detail</h1>
+{% if message %}
+    <div class="alert alert-success" role="alert">
+        {{ message }}
+    </div>
+{% endif %}
 <h2>{{ post.title }}</h2>
 <p>{{ post.content }}</p>
+<p>
+{#{% if reactions %}#}
+{#    {% for reaction in reactions %}#}
+{#        {{ reaction }}#}
+{#    {% endfor %}#}
+{#{% endif %}#}
+</p>
+<h3>likes</h3>
+<form action="{% url 'posts:add_reaction' post.id %}" method="post">
+    {% csrf_token %}
+    {{ reaction_form.as_p }}
+    <button type="submit">submit</button>
+</form>
 <img src="{{ post.images.first.image.url }}" alt="{{ post.images.first.alt }}">
+<h2>comments</h2>
+<ul>
+    {% for comment in comments %}
+        <li>{{ comment.content }} - {{ comment.user }}</li>
+    {% endfor %}
+</ul>
+<form method="post" action="{% url 'posts:add_comment' post.id %}">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button type="submit">submit</button>
+</form>
 </body>
 </html>

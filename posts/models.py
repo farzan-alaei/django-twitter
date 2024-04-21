@@ -30,7 +30,8 @@ class Post(models.Model):
 class Reaction(models.Model):
     user = models.ForeignKey(User, verbose_name=_("user"), on_delete=models.CASCADE)
     related_post = models.ForeignKey(Post, verbose_name=_("Post"), on_delete=models.CASCADE)
-    liked = models.BooleanField(default=True)
+    liked = models.BooleanField(default=False)
+    disliked = models.BooleanField(default=False)
 
 
 class Comment(models.Model):
@@ -40,6 +41,9 @@ class Comment(models.Model):
     reply_to = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.content
 
 
 class Image(models.Model):
