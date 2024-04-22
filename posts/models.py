@@ -49,9 +49,13 @@ class Comment(models.Model):
 class Image(models.Model):
     post = models.ForeignKey('Post', verbose_name=_('post'), on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='post/image/')
+    is_featured = models.BooleanField(verbose_name=_('is featured'), default=False)
     alt = models.CharField(verbose_name=_('alternative'), max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-is_featured', '-created_at']
 
 
 class Tag(models.Model):

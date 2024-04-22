@@ -14,7 +14,6 @@
     {{ message }}
     {{ form.as_p }}
     <div id="image-forms">
-        <!-- اینجا تمام فرم‌های InlineFormSet به صورت پنهان قرار می‌گیرند -->
         {{ image_formset.management_form }}
         {% for form in image_formset %}
         {{ form.as_p }}

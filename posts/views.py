@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.http import Http404
 
 
 # Create your views here.
@@ -46,6 +47,9 @@ class PostListView(LoginRequiredMixin, ListView):
     model = Post
     template_name = 'posts/post_list.html'
 
+    def get_queryset(self):
+        return Post.objects.filter(archived=False).order_by('-created_at')
+
 
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
@@ -54,11 +58,43 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         post = self.get_object()
+        if post.archived:
+            raise Http404("Post does not exist")
         data['comment_form'] = CommentForm()
         data['reaction_form'] = ReactionForm()
         data['reactions'] = get_object_or_404(Post, pk=post.pk)
         data['comments'] = post.comments.all()
         return data
+
+
+class PostUpdateView(LoginRequiredMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'posts/post_update.html'
+
+    def get_success_url(self):
+        return reverse_lazy('posts:post_detail', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
+        else:
+            data['image_formset'] = ImageFormSet(instance=self.object)
+        return data
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        self.object = form.save()
+        self.save_images(form)
+        return super().form_valid(form)
+
+    def save_images(self, form):
+        context = self.get_context_data()
+        image_formset = context['image_formset']
+        if image_formset.is_valid():
+            image_formset.instance = self.object
+            image_formset.save()
 
 
 class AddCommentView(LoginRequiredMixin, FormView):

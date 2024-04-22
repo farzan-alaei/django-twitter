@@ -13,12 +13,13 @@
 {% endif %}
 <h2>{{ post.title }}</h2>
 <p>{{ post.content }}</p>
+<p><a href="{% url 'posts:post_update' post.id %}">Edit Post</a></p>
 <p>
-{#{% if reactions %}#}
-{#    {% for reaction in reactions %}#}
-{#        {{ reaction }}#}
-{#    {% endfor %}#}
-{#{% endif %}#}
+    {#{% if reactions %}#}
+    {#    {% for reaction in reactions %}#}
+    {#        {{ reaction }}#}
+    {#    {% endfor %}#}
+    {#{% endif %}#}
 </p>
 <h3>likes</h3>
 <form action="{% url 'posts:add_reaction' post.id %}" method="post">
@@ -26,7 +27,9 @@
     {{ reaction_form.as_p }}
     <button type="submit">submit</button>
 </form>
-<img src="{{ post.images.first.image.url }}" alt="{{ post.images.first.alt }}">
+{% for image in post.images.all %}
+    <img src="{{ image.image.url }}" alt="{{ image.alt }}">
+{% endfor %}
 <h2>comments</h2>
 <ul>
     {% for comment in comments %}
