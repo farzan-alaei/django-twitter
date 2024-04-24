@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import User
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Count
 
 
 # Create your models here.
@@ -25,6 +26,11 @@ class Post(models.Model):
     archived = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def count_reactions(self):
+        likes = self.reaction_set.filter(liked=True).count()
+        dislikes = self.reaction_set.filter(disliked=True).count()
+        return likes, dislikes
 
 
 class Reaction(models.Model):

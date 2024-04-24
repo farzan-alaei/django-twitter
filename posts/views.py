@@ -50,6 +50,11 @@ class PostListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Post.objects.filter(archived=False).order_by('-created_at')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['likes_dislikes'] = {post.id: post.count_reactions() for post in self.object_list}
+        return context
+
 
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
@@ -58,12 +63,16 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         post = self.get_object()
+        likes, dislikes = post.count_reactions()
         if post.archived:
             raise Http404("Post does not exist")
         data['comment_form'] = CommentForm()
         data['reaction_form'] = ReactionForm()
         data['reactions'] = get_object_or_404(Post, pk=post.pk)
         data['comments'] = post.comments.all()
+        data['tags'] = post.tags.all()
+        data['likes'] = likes
+        data['dislikes'] = dislikes
         return data
 
 

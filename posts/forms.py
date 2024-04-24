@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Image, Comment, Reaction
+from .models import Post, Image, Comment, Reaction, Tag
 from django.forms import inlineformset_factory
 
 
@@ -25,6 +25,12 @@ class ReactionForm(forms.ModelForm):
     class Meta:
         model = Reaction
         fields = ['liked', 'disliked']
+
+
+class TagForm(forms.ModelForm):
+    class Meta:
+        model = Tag
+        fields = ['name']
 
 
 ImageFormSet = inlineformset_factory(Post, Image, form=ImageForm, extra=5, can_delete=True)
