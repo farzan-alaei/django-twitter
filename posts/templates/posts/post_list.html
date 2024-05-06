@@ -13,11 +13,23 @@
             <div class="card-body">
                 <h2 class="card-title">{{ post.title }}</h2>
                 <p class="card-text">{{ post.content }}</p>
+                <form action="{% url 'posts:add_reaction' post.id %}" method="post">
+                    {% csrf_token %}
+                    {{ reaction_form.as_p }}
+                    <button type="submit" name="liked" value="True" class="btn btn-primary">Like</button>
+                    <button type="submit" name="disliked" value="True" class="btn btn-danger">Dislike</button>
+                </form>
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="card-text">Likes: {{ post.count_reactions.0 }}</p>
-                        <p class="card-text">Dislikes: {{ post.count_reactions.1 }}</p>
+                        <h3>Likes</h3>
+                        <p>{{ post.count_reactions.0 }}</p>
                     </div>
+                    <div class="col-md-6">
+                        <h3>Dislikes</h3>
+                        <p>{{ post.count_reactions.1 }}</p>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
                         <img src="{{ post.images.first.image.url }}" class="img-fluid"
                              alt="{{ post.images.first.alt }}">

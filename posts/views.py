@@ -53,6 +53,7 @@ class PostListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         posts = context['object_list']
+        context['reaction_form'] = ReactionForm()
         return context
 
 
@@ -132,14 +133,14 @@ class AddReactionView(LoginRequiredMixin, FormView):
 
     model = Reaction
     form_class = ReactionForm
-    template_name = 'posts/post_detail.html'
+    template_name = ['posts/post_detail.html', 'posts/post_list.html']
 
     def get_success_url(self):
-        """
-        Returns the URL to redirect to after a successful form submission.
-        """
-        post_pk = self.kwargs.get('pk')
-        return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
+        if self.request.resolver_match.url_name == 'posts:post_detail':
+            post_pk = self.kwargs.get('pk')
+            return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
+        else:
+            return reverse_lazy('posts:post_list')
 
     def form_valid(self, form):
         """
@@ -156,11 +157,25 @@ class AddReactionView(LoginRequiredMixin, FormView):
         liked = self.request.POST.get('liked', False)
         disliked = self.request.POST.get('disliked', False)
 
-        reaction, created = Reaction.objects.update_or_create(
-            user=user, related_post=post, defaults={'liked': liked, 'disliked': disliked}
-        )
+        try:
+            reaction = Reaction.objects.get(user=user, related_post=post)
+        except Reaction.DoesNotExist:
+            reaction = None
 
-        if not created and (liked == reaction.liked and disliked == reaction.disliked):
-            reaction.delete()  # Remove unchanged reaction
+            # Handle reaction based on existing reaction and new values
+        if reaction:
+            if liked == str(reaction.liked) and disliked == str(reaction.disliked):
+                # Delete unchanged reaction
+                reaction.delete()
+            else:
+                # Update reaction with new values
+                reaction.liked = liked
+                reaction.disliked = disliked
+                reaction.save()
+        else:
+            # Create new reaction
+            reaction = Reaction.objects.create(
+                user=user, related_post=post, liked=liked, disliked=disliked
+            )
 
         return super().form_valid(form)
