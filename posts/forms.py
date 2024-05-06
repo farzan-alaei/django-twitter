@@ -25,6 +25,7 @@ class ReactionForm(forms.ModelForm):
     class Meta:
         model = Reaction
         fields = ['liked', 'disliked']
+        widgets = {'liked': forms.HiddenInput(), 'disliked': forms.HiddenInput()}
 
 
 class TagForm(forms.ModelForm):

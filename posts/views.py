@@ -52,7 +52,7 @@ class PostListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['likes_dislikes'] = {post.id: post.count_reactions() for post in self.object_list}
+        posts = context['object_list']
         return context
 
 
@@ -125,38 +125,42 @@ class AddCommentView(LoginRequiredMixin, FormView):
 
 
 class AddReactionView(LoginRequiredMixin, FormView):
+    """
+    A class-based view that handles adding reactions (likes/dislikes) to posts.
+    Requires users to be logged in.
+    """
+
     model = Reaction
     form_class = ReactionForm
     template_name = 'posts/post_detail.html'
 
     def get_success_url(self):
+        """
+        Returns the URL to redirect to after a successful form submission.
+        """
         post_pk = self.kwargs.get('pk')
         return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
 
     def form_valid(self, form):
+        """
+        Handles valid form submissions and updates or creates user reactions.
+        Args:
+            form (Form): The validated reaction form.
+        Returns:
+            HttpResponseRedirect: The response object with the redirect URL.
+        """
+
         post_pk = self.kwargs.get('pk')
         post = get_object_or_404(Post, pk=post_pk)
         user = self.request.user
-        if form.is_valid():
-            liked = form.cleaned_data.get('liked')
-            disliked = form.cleaned_data.get('disliked')
+        liked = self.request.POST.get('liked', False)
+        disliked = self.request.POST.get('disliked', False)
 
-            existing_reaction = Reaction.objects.filter(
-                Q(user=user) & Q(related_post=post)
-            ).first()
+        reaction, created = Reaction.objects.update_or_create(
+            user=user, related_post=post, defaults={'liked': liked, 'disliked': disliked}
+        )
 
-            if existing_reaction:
-                if liked and existing_reaction.liked:
-                    existing_reaction.delete()
-                elif disliked and existing_reaction.disliked:
-                    existing_reaction.delete()
-                else:
-                    existing_reaction.liked = liked
-                    existing_reaction.disliked = disliked
-                    existing_reaction.save()
-            else:
-                form.instance.user = user
-                form.instance.related_post = post
-                form.save()
+        if not created and (liked == reaction.liked and disliked == reaction.disliked):
+            reaction.delete()  # Remove unchanged reaction
 
         return super().form_valid(form)
