@@ -11,9 +11,11 @@
     {% for post in object_list %}
         <div class="card mt-4">
             <div class="card-body">
-                <h2 class="card-title">{{ post.title }}</h2>
+                <a href="{% url 'posts:post_detail' post.id %}">
+                    <h2 class="card-title">{{ post.title }}</h2>
+                </a>
                 <p class="card-text">{{ post.content }}</p>
-                <form action="{% url 'posts:add_reaction' post.id %}" method="post">
+                <form action="{% url 'posts:add_reaction' post.id %}?next=list" method="post">
                     {% csrf_token %}
                     {{ reaction_form.as_p }}
                     <button type="submit" name="liked" value="True" class="btn btn-primary">Like</button>

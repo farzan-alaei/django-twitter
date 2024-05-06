@@ -136,11 +136,12 @@ class AddReactionView(LoginRequiredMixin, FormView):
     template_name = ['posts/post_detail.html', 'posts/post_list.html']
 
     def get_success_url(self):
-        if self.request.resolver_match.url_name == 'posts:post_detail':
+        next_page = self.request.GET.get('next', None)
+        if next_page == 'list':
+            return reverse_lazy('posts:post_list')
+        else:
             post_pk = self.kwargs.get('pk')
             return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
-        else:
-            return reverse_lazy('posts:post_list')
 
     def form_valid(self, form):
         """
