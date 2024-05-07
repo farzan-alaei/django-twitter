@@ -1,0 +1,26 @@
+<li class="list-group-item">
+    {{ comment.content }} - {{ comment.user }}
+    <button type="button" class="btn btn-link replyBtn" data-bs-toggle="collapse"
+            data-bs-target="#replyForm{{ comment.id }}" aria-expanded="false"
+            aria-controls="replyForm{{ comment.id }}">Reply to
+    </button>
+    <div class="collapse" id="replyForm{{ comment.id }}">
+        <form method="post" action="{% url 'posts:add_comment' post.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="commentContent{{ comment.id }}">Your Comment</label>
+                <textarea class="form-control" id="commentContent{{ comment.id }}" name="content"
+                          rows="3"></textarea>
+                <input type="hidden" name="reply_to" value="{{ comment.id }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+    {% if comment.replies.all %}
+        <ul class="list-group mt-2">
+            {% for reply in comment.replies.all %}
+                {% include 'posts/comment_template.html' with comment=reply %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

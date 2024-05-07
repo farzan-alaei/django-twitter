@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from posts.forms import PostForm, ImageFormSet, CommentForm, ReactionForm
 from posts.models import Post, Comment, Reaction
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, FormView
@@ -6,7 +6,6 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
 from django.http import Http404
 
 
@@ -117,12 +116,63 @@ class AddCommentView(LoginRequiredMixin, FormView):
         return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
 
     def form_valid(self, form):
+        """
+        Validates the form and saves the associated comment.
+        Args:
+            form (CommentForm): The form containing the comment data.
+        Returns:
+            HttpResponse: The response object with the redirect URL.
+        Raises:
+            Http404: If the post with the given primary key does not exist.
+        """
         post_pk = self.kwargs.get('pk')
         post = get_object_or_404(Post, pk=post_pk)
         form.instance.user = self.request.user
         form.instance.post = post
         form.save()
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        """
+        Retrieves the context data by calling the parent class method with the provided keyword arguments.
+        Sets 'reply_to_form' in the context by invoking 'get_reply_to_form'.
+        Returns the updated context.
+        """
+        context = super().get_context_data(**kwargs)
+        context['reply_to_form'] = self.get_reply_to_form()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+            Handles the POST request. Processes the reply form data if present.
+            Redirects to the success URL if the reply form is valid.
+            Raises an exception if the reply form is not valid.
+        """
+        if 'reply_to_comment_id' in request.POST:
+            reply_to_form = self.get_reply_to_form(request.POST)
+            if reply_to_form.is_valid():
+                post_pk = self.kwargs.get('pk')
+                post = get_object_or_404(Post, pk=post_pk)
+                reply_to_form.instance.user = self.request.user
+                reply_to_form.instance.post = post
+                reply_to_form.save()
+                return redirect(self.get_success_url())
+            else:
+                raise Exception('Reply form is not valid.')
+
+        return super().post(request, *args, **kwargs)
+
+    def get_reply_to_form(self, data=None):
+        """
+        Generates a reply form for the given data.
+        Parameters:
+            data (dict, optional): The data to initialize the form with. Defaults to None.
+        Returns:
+            CommentForm: The reply form without the 'reply_to' field.
+        """
+        reply_to_form = CommentForm(data)
+        del reply_to_form.fields['reply_to']
+        return reply_to_form
 
 
 class AddReactionView(LoginRequiredMixin, FormView):
