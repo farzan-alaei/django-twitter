@@ -20,6 +20,15 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('posts:post_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
+        """
+        Retrieves the context data for the view.
+        Args:
+            **kwargs: Additional keyword arguments.
+        Returns:
+            dict: The context data for the view.
+        This method overrides the `get_context_data` method of the parent class. It retrieves the context data by calling the parent class method with the provided keyword arguments. It sets the 'image_formset' key in the context data by creating an instance of `ImageFormSet` with the request POST data and request files, or with the instance of the current object if the request POST data is empty. The resulting context data is returned.
+        """
+
         data = super().get_context_data(**kwargs)
         if self.request.POST:
             data['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
@@ -28,6 +37,14 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return data
 
     def form_valid(self, form):
+        """
+        Validates the form and saves the associated post.
+        Sets the user of the form instance to the current request user.
+        Saves the form and the associated object, saves any images related to the post,
+        adds a success message, and invokes the parent class's form_valid method with the form.
+        Returns the result of the parent class's form_valid method.
+        """
+
         form.instance.user = self.request.user
         self.object = form.save()
         self.save_images(form)
@@ -35,6 +52,14 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def save_images(self, form):
+        """
+        Saves the images associated with the post.
+        Parameters:
+            form (Form): The form containing the post data.
+        Returns:
+            None
+        """
+
         context = self.get_context_data()
         image_formset = context['image_formset']
         if image_formset.is_valid():
@@ -50,6 +75,18 @@ class PostListView(LoginRequiredMixin, ListView):
         return Post.objects.filter(archived=False).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
+        """
+        Retrieves the context data for the view.
+        Args:
+            **kwargs: Additional keyword arguments.
+        Returns:
+            dict: The context data for the view.
+        This method overrides the `get_context_data` method of the parent class.
+        It retrieves the context data by calling the parent class method with the provided keyword arguments.
+        It sets the 'reaction_form' key in the context data by creating an instance of `ReactionForm`.
+        The resulting context data is returned.
+        """
+
         context = super().get_context_data(**kwargs)
         posts = context['object_list']
         context['reaction_form'] = ReactionForm()
@@ -61,6 +98,18 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     template_name = 'posts/post_detail.html'
 
     def get_context_data(self, **kwargs):
+        """
+        Retrieves the context data for the view.
+        Args:
+            **kwargs: Additional keyword arguments.
+        Returns:
+            dict: The context data for the view.
+        This method overrides the `get_context_data` method of the parent class.
+        It retrieves the context data by calling the parent class method with the provided keyword arguments.
+        It sets the 'comment_form', 'reaction_form', 'reactions', 'comments',
+        'tags', 'likes', and 'dislikes' keys in the context data.
+        """
+
         data = super().get_context_data(**kwargs)
         post = self.get_object()
         likes, dislikes = post.count_reactions()
@@ -84,7 +133,29 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('posts:post_detail', kwargs={'pk': self.object.pk})
 
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Dispatches the request to the appropriate handler method.
+        Parameters:
+            request: The request object.
+            args: Additional positional arguments.
+            kwargs: Additional keyword arguments.
+        Returns:
+            The result of the dispatch method.
+        """
+
+        self.object = self.get_object()
+        if self.object.user != self.request.user:
+            raise Http404("You are not allowed to update this post.")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
+        """
+        Retrieves context data for the view based on the provided keyword arguments.
+        Sets 'image_formset' in the context data based on the request POST data and files.
+        Returns the updated context data.
+        """
+
         data = super().get_context_data(**kwargs)
         if self.request.POST:
             data['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
@@ -93,12 +164,34 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         return data
 
     def form_valid(self, form):
+        """
+        Validates the form and saves the associated post.
+
+        Args:
+            form (Form): The form containing the post data.
+
+        Returns:
+            HttpResponse: The response object with the redirect URL.
+
+        This method sets the user of the form instance to the current request user, saves the form and the associated object, saves any images related to the post, and invokes the parent class's form_valid method with the form. The result of the parent class's form_valid method is returned.
+        """
+
         form.instance.user = self.request.user
         self.object = form.save()
         self.save_images(form)
         return super().form_valid(form)
 
     def save_images(self, form):
+        """
+        Save the images associated with the post.
+        Parameters:
+            form (Form): The form containing the post data.
+        Returns:
+            None
+        This method retrieves the image formset from the context data and checks if it is valid.
+        If it is valid, it sets the instance of the image formset to the current object and saves it.
+
+        """
         context = self.get_context_data()
         image_formset = context['image_formset']
         if image_formset.is_valid():
