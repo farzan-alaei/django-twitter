@@ -32,6 +32,9 @@ class Post(models.Model):
         dislikes = self.reaction_set.filter(disliked=True).count()
         return likes, dislikes
 
+    def __str__(self):
+        return f"{self.title} - {self.user}"
+
 
 class Reaction(models.Model):
     user = models.ForeignKey(User, verbose_name=_("user"), on_delete=models.CASCADE)
