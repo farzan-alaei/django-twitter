@@ -26,7 +26,11 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             **kwargs: Additional keyword arguments.
         Returns:
             dict: The context data for the view.
-        This method overrides the `get_context_data` method of the parent class. It retrieves the context data by calling the parent class method with the provided keyword arguments. It sets the 'image_formset' key in the context data by creating an instance of `ImageFormSet` with the request POST data and request files, or with the instance of the current object if the request POST data is empty. The resulting context data is returned.
+        This method overrides the `get_context_data` method of the parent class.
+        It retrieves the context data by calling the parent class method with the provided keyword arguments.
+        It sets the 'image_formset' key in the context data by creating an instance of `ImageFormSet` with the request
+        POST data and request files, or with the instance of the current object if the request POST data is empty.
+        The resulting context data is returned.
         """
 
         data = super().get_context_data(**kwargs)
@@ -173,7 +177,10 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         Returns:
             HttpResponse: The response object with the redirect URL.
 
-        This method sets the user of the form instance to the current request user, saves the form and the associated object, saves any images related to the post, and invokes the parent class's form_valid method with the form. The result of the parent class's form_valid method is returned.
+        This method sets the user of the form instance to the current request user,
+        saves the form and the associated object, saves any images related to the post,
+        and invokes the parent class's form_valid method with the form.
+        The result of the parent class's form_valid method is returned.
         """
 
         form.instance.user = self.request.user
