@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.http import Http404
+from django.db.models import Prefetch
 
 
 # Create your views here.
@@ -76,7 +77,10 @@ class PostListView(LoginRequiredMixin, ListView):
     template_name = 'posts/post_list.html'
 
     def get_queryset(self):
-        return Post.objects.filter(archived=False).order_by('-created_at').prefetch_related('comments')
+        return Post.objects.filter(archived=False).order_by('-created_at').prefetch_related(
+            Prefetch('comments',
+                     to_attr='latest_comments')
+        )
 
     def get_context_data(self, **kwargs):
         """

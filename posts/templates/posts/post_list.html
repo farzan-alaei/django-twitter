@@ -8,7 +8,7 @@
 <body>
 <div class="container">
     <h1 class="mt-5">Post List</h1>
-    {% for post in post_list %}
+    {% for post in object_list %}
         <div class="card mt-4">
             <div class="card-body">
                 <a href="{% url 'posts:post_detail' post.id %}">
@@ -40,11 +40,16 @@
                 <!-- Comments -->
                 <h3>Comments</h3>
                 <ul class="list-group">
-                    {% for comment in post.comments.all %}
+                    {% for comment in post.latest_comments|slice:":3" %}
                         {% if not comment.reply_to %}
                             {% include 'posts/comment_template.html' with comment=comment %}
                         {% endif %}
                     {% endfor %}
+                    {% if post.latest_comments|length > 3 %}
+                        <li class="list-group-item">
+                            <a href="{% url 'posts:post_detail' post.id %}">View all comments</a>
+                        </li>
+                    {% endif %}
                 </ul>
 
 
