@@ -76,7 +76,7 @@ class PostListView(LoginRequiredMixin, ListView):
     template_name = 'posts/post_list.html'
 
     def get_queryset(self):
-        return Post.objects.filter(archived=False).order_by('-created_at')
+        return Post.objects.filter(archived=False).order_by('-created_at').prefetch_related('comments')
 
     def get_context_data(self, **kwargs):
         """
@@ -92,7 +92,6 @@ class PostListView(LoginRequiredMixin, ListView):
         """
 
         context = super().get_context_data(**kwargs)
-        posts = context['object_list']
         context['reaction_form'] = ReactionForm()
         return context
 
@@ -212,8 +211,12 @@ class AddCommentView(LoginRequiredMixin, FormView):
     template_name = 'posts/post_detail.html'
 
     def get_success_url(self):
-        post_pk = self.kwargs.get('pk')
-        return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
+        next_page = self.request.GET.get('next', None)
+        if next_page == 'list':
+            return reverse_lazy('posts:post_list')
+        else:
+            post_pk = self.kwargs.get('pk')
+            return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
 
     def form_valid(self, form):
         """

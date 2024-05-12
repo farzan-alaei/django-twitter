@@ -8,7 +8,7 @@
 <body>
 <div class="container">
     <h1 class="mt-5">Post List</h1>
-    {% for post in object_list %}
+    {% for post in post_list %}
         <div class="card mt-4">
             <div class="card-body">
                 <a href="{% url 'posts:post_detail' post.id %}">
@@ -37,6 +37,31 @@
                              alt="{{ post.images.first.alt }}">
                     </div>
                 </div>
+                <!-- Comments -->
+                <h3>Comments</h3>
+                <ul class="list-group">
+                    {% for comment in post.comments.all %}
+                        {% if not comment.reply_to %}
+                            {% include 'posts/comment_template.html' with comment=comment %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+
+                <!-- Comment Form -->
+                <div class="mt-3">
+                    <h3>Leave a Comment</h3>
+                    <form method="post" action="{% url 'posts:add_comment' post.id %}?next=list">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="commentContent">Your Comment</label>
+                            <textarea class="form-control" id="commentContent" name="content" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+
+                <!-- End Comments -->
             </div>
         </div>
     {% endfor %}

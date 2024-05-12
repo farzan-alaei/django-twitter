@@ -5,7 +5,7 @@
             aria-controls="replyForm{{ comment.id }}">Reply to
     </button>
     <div class="collapse" id="replyForm{{ comment.id }}">
-        <form method="post" action="{% url 'posts:add_comment' post.id %}">
+        <form method="post" action="{% url 'posts:add_comment' post.id %}?next=list">
             {% csrf_token %}
             <div class="form-group">
                 <label for="commentContent{{ comment.id }}">Your Comment</label>
