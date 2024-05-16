@@ -11,6 +11,7 @@ from django.db.models import Prefetch
 
 
 # Create your views here.
+
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
@@ -21,19 +22,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('posts:post_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
-        """
-        Retrieves the context data for the view.
-        Args:
-            **kwargs: Additional keyword arguments.
-        Returns:
-            dict: The context data for the view.
-        This method overrides the `get_context_data` method of the parent class.
-        It retrieves the context data by calling the parent class method with the provided keyword arguments.
-        It sets the 'image_formset' key in the context data by creating an instance of `ImageFormSet` with the request
-        POST data and request files, or with the instance of the current object if the request POST data is empty.
-        The resulting context data is returned.
-        """
-
         data = super().get_context_data(**kwargs)
         if self.request.POST:
             data['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
@@ -42,33 +30,15 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return data
 
     def form_valid(self, form):
-        """
-        Validates the form and saves the associated post.
-        Sets the user of the form instance to the current request user.
-        Saves the form and the associated object, saves any images related to the post,
-        adds a success message, and invokes the parent class's form_valid method with the form.
-        Returns the result of the parent class's form_valid method.
-        """
-
         form.instance.user = self.request.user
         self.object = form.save()
-        self.save_images(form)
+        self.save_images(self.object, self.request.POST, self.request.FILES)
         messages.success(self.request, self.message)
         return super().form_valid(form)
 
-    def save_images(self, form):
-        """
-        Saves the images associated with the post.
-        Parameters:
-            form (Form): The form containing the post data.
-        Returns:
-            None
-        """
-
-        context = self.get_context_data()
-        image_formset = context['image_formset']
+    def save_images(self, post_instance, post_data, files_data):
+        image_formset = ImageFormSet(post_data, files_data, instance=post_instance)
         if image_formset.is_valid():
-            image_formset.instance = self.object
             image_formset.save()
 
 

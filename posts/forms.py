@@ -14,11 +14,21 @@ class ImageForm(forms.ModelForm):
         model = Image
         fields = ['image', 'alt', 'is_featured']
 
+    def __init__(self, *args, **kwargs):
+        super(ImageForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-control'})
+
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['title', 'content', 'status', 'tags', 'archived']
+
+    def __init__(self, *args, **kwargs):
+        super(PostForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-control'})
 
 
 class ReactionForm(forms.ModelForm):
@@ -34,4 +44,4 @@ class TagForm(forms.ModelForm):
         fields = ['name']
 
 
-ImageFormSet = inlineformset_factory(Post, Image, form=ImageForm, extra=5, can_delete=True)
+ImageFormSet = inlineformset_factory(Post, Image, form=ImageForm, extra=3, can_delete=True)

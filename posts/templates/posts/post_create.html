@@ -2,25 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Post Create</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>Create Post</h1>
-<form method="post" enctype="multipart/form-data" id="post-form">
-    {% csrf_token %}
-    {{ message }}
-    {{ form.as_p }}
-    <div id="image-forms">
-        {{ image_formset.management_form }}
-        {% for form in image_formset %}
-        {{ form.as_p }}
-        {% endfor %}
-    </div>
-    <button type="submit">Submit</button>
-</form>
+<div class="container mt-5">
+    <h1 class="mb-4">Create Post</h1>
+    <form method="post" enctype="multipart/form-data" id="post-form">
+        {% csrf_token %}
+        {% if message %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endif %}
+        {{ form.non_field_errors }}
+        <div class="form-group">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {{ form.title.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.content.label_tag }}
+            {{ form.content }}
+            {{ form.content.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.status.label_tag }}
+            {{ form.status }}
+            {{ form.status.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.tags.label_tag }}
+            {{ form.tags }}
+            {{ form.tags.errors }}
+        </div>
+        <div class="form-group">
+            {{ form.archived.label_tag }}
+            {{ form.archived }}
+            {{ form.archived.errors }}
+        </div>
+        <div id="image-forms" class="hidden">
+            {{ image_formset.management_form }}
+            {% for form in image_formset %}
+                <div class="form-group">
+                    {{ form.non_field_errors }}
+                    <div class="form-group">
+                        {{ form.image.label_tag }}
+                        {{ form.image }}
+                        {{ form.image.errors }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.alt.label_tag }}
+                        {{ form.alt }}
+                        {{ form.alt.errors }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.is_featured.label_tag }}
+                        {{ form.is_featured }}
+                        {{ form.is_featured.errors }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Custom JS for adding new image forms -->
 
 </body>
 </html>
