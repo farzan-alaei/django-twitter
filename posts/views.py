@@ -12,21 +12,24 @@ from django.db.models import Prefetch
 
 # Create your views here.
 
+
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
-    template_name = 'posts/post_create.html'
-    message = 'Post created successfully'
+    template_name = "posts/post_create.html"
+    message = "Post created successfully"
 
     def get_success_url(self):
-        return reverse_lazy('posts:post_detail', kwargs={'pk': self.object.pk})
+        return reverse_lazy("posts:post_detail", kwargs={"pk": self.object.pk})
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
+            data["image_formset"] = ImageFormSet(
+                self.request.POST, self.request.FILES, instance=self.object
+            )
         else:
-            data['image_formset'] = ImageFormSet(instance=self.object)
+            data["image_formset"] = ImageFormSet(instance=self.object)
         return data
 
     def form_valid(self, form):
@@ -44,12 +47,13 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class PostListView(LoginRequiredMixin, ListView):
     model = Post
-    template_name = 'posts/post_list.html'
+    template_name = "posts/post_list.html"
 
     def get_queryset(self):
-        return Post.objects.filter(archived=False).order_by('-created_at').prefetch_related(
-            Prefetch('comments',
-                     to_attr='latest_comments')
+        return (
+            Post.objects.filter(archived=False)
+            .order_by("-created_at")
+            .prefetch_related(Prefetch("comments", to_attr="latest_comments"))
         )
 
     def get_context_data(self, **kwargs):
@@ -66,13 +70,13 @@ class PostListView(LoginRequiredMixin, ListView):
         """
 
         context = super().get_context_data(**kwargs)
-        context['reaction_form'] = ReactionForm()
+        context["reaction_form"] = ReactionForm()
         return context
 
 
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
-    template_name = 'posts/post_detail.html'
+    template_name = "posts/post_detail.html"
 
     def get_context_data(self, **kwargs):
         """
@@ -92,23 +96,23 @@ class PostDetailView(LoginRequiredMixin, DetailView):
         likes, dislikes = post.count_reactions()
         if post.archived:
             raise Http404("Post does not exist")
-        data['comment_form'] = CommentForm()
-        data['reaction_form'] = ReactionForm()
-        data['reactions'] = get_object_or_404(Post, pk=post.pk)
-        data['comments'] = post.comments.all()
-        data['tags'] = post.tags.all()
-        data['likes'] = likes
-        data['dislikes'] = dislikes
+        data["comment_form"] = CommentForm()
+        data["reaction_form"] = ReactionForm()
+        data["reactions"] = get_object_or_404(Post, pk=post.pk)
+        data["comments"] = post.comments.all()
+        data["tags"] = post.tags.all()
+        data["likes"] = likes
+        data["dislikes"] = dislikes
         return data
 
 
 class PostUpdateView(LoginRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'posts/post_update.html'
+    template_name = "posts/post_update.html"
 
     def get_success_url(self):
-        return reverse_lazy('posts:post_detail', kwargs={'pk': self.object.pk})
+        return reverse_lazy("posts:post_detail", kwargs={"pk": self.object.pk})
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -135,9 +139,11 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
 
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data['image_formset'] = ImageFormSet(self.request.POST, self.request.FILES, instance=self.object)
+            data["image_formset"] = ImageFormSet(
+                self.request.POST, self.request.FILES, instance=self.object
+            )
         else:
-            data['image_formset'] = ImageFormSet(instance=self.object)
+            data["image_formset"] = ImageFormSet(instance=self.object)
         return data
 
     def form_valid(self, form):
@@ -173,7 +179,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
 
         """
         context = self.get_context_data()
-        image_formset = context['image_formset']
+        image_formset = context["image_formset"]
         if image_formset.is_valid():
             image_formset.instance = self.object
             image_formset.save()
@@ -182,15 +188,15 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
 class AddCommentView(LoginRequiredMixin, FormView):
     model = Comment
     form_class = CommentForm
-    template_name = 'posts/post_detail.html'
+    template_name = "posts/post_detail.html"
 
     def get_success_url(self):
-        next_page = self.request.GET.get('next', None)
-        if next_page == 'list':
-            return reverse_lazy('posts:post_list')
+        next_page = self.request.GET.get("next", None)
+        if next_page == "list":
+            return reverse_lazy("posts:post_list")
         else:
-            post_pk = self.kwargs.get('pk')
-            return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
+            post_pk = self.kwargs.get("pk")
+            return reverse_lazy("posts:post_detail", kwargs={"pk": post_pk})
 
     def form_valid(self, form):
         """
@@ -202,7 +208,7 @@ class AddCommentView(LoginRequiredMixin, FormView):
         Raises:
             Http404: If the post with the given primary key does not exist.
         """
-        post_pk = self.kwargs.get('pk')
+        post_pk = self.kwargs.get("pk")
         post = get_object_or_404(Post, pk=post_pk)
         form.instance.user = self.request.user
         form.instance.post = post
@@ -216,26 +222,26 @@ class AddCommentView(LoginRequiredMixin, FormView):
         Returns the updated context.
         """
         context = super().get_context_data(**kwargs)
-        context['reply_to_form'] = self.get_reply_to_form()
+        context["reply_to_form"] = self.get_reply_to_form()
         return context
 
     def post(self, request, *args, **kwargs):
         """
-            Handles the POST request. Processes the reply form data if present.
-            Redirects to the success URL if the reply form is valid.
-            Raises an exception if the reply form is not valid.
+        Handles the POST request. Processes the reply form data if present.
+        Redirects to the success URL if the reply form is valid.
+        Raises an exception if the reply form is not valid.
         """
-        if 'reply_to_comment_id' in request.POST:
+        if "reply_to_comment_id" in request.POST:
             reply_to_form = self.get_reply_to_form(request.POST)
             if reply_to_form.is_valid():
-                post_pk = self.kwargs.get('pk')
+                post_pk = self.kwargs.get("pk")
                 post = get_object_or_404(Post, pk=post_pk)
                 reply_to_form.instance.user = self.request.user
                 reply_to_form.instance.post = post
                 reply_to_form.save()
                 return redirect(self.get_success_url())
             else:
-                raise Exception('Reply form is not valid.')
+                raise Exception("Reply form is not valid.")
 
         return super().post(request, *args, **kwargs)
 
@@ -248,7 +254,7 @@ class AddCommentView(LoginRequiredMixin, FormView):
             CommentForm: The reply form without the 'reply_to' field.
         """
         reply_to_form = CommentForm(data)
-        del reply_to_form.fields['reply_to']
+        del reply_to_form.fields["reply_to"]
         return reply_to_form
 
 
@@ -260,15 +266,15 @@ class AddReactionView(LoginRequiredMixin, FormView):
 
     model = Reaction
     form_class = ReactionForm
-    template_name = ['posts/post_detail.html', 'posts/post_list.html']
+    template_name = ["posts/post_detail.html", "posts/post_list.html"]
 
     def get_success_url(self):
-        next_page = self.request.GET.get('next', None)
-        if next_page == 'list':
-            return reverse_lazy('posts:post_list')
+        next_page = self.request.GET.get("next", None)
+        if next_page == "list":
+            return reverse_lazy("posts:post_list")
         else:
-            post_pk = self.kwargs.get('pk')
-            return reverse_lazy('posts:post_detail', kwargs={'pk': post_pk})
+            post_pk = self.kwargs.get("pk")
+            return reverse_lazy("posts:post_detail", kwargs={"pk": post_pk})
 
     def form_valid(self, form):
         """
@@ -279,11 +285,11 @@ class AddReactionView(LoginRequiredMixin, FormView):
             HttpResponseRedirect: The response object with the redirect URL.
         """
 
-        post_pk = self.kwargs.get('pk')
+        post_pk = self.kwargs.get("pk")
         post = get_object_or_404(Post, pk=post_pk)
         user = self.request.user
-        liked = self.request.POST.get('liked', False)
-        disliked = self.request.POST.get('disliked', False)
+        liked = self.request.POST.get("liked", False)
+        disliked = self.request.POST.get("disliked", False)
 
         try:
             reaction = Reaction.objects.get(user=user, related_post=post)

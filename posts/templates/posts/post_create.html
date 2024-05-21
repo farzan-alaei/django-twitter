@@ -7,6 +7,7 @@
     <title>Post Create</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    {{ form.media.css }}
 </head>
 <body>
 <div class="container mt-5">
@@ -40,6 +41,11 @@
             {{ form.tags.errors }}
         </div>
         <div class="form-group">
+            {{ form.new_tag.label_tag }}
+            {{ form.new_tag }}
+            {{ form.new_tag.errors }}
+        </div>
+        <div class="form-group">
             {{ form.archived.label_tag }}
             {{ form.archived }}
             {{ form.archived.errors }}
@@ -69,7 +75,6 @@
         </div>
 
 
-
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
@@ -79,6 +84,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <!-- Custom JS for adding new image forms -->
-
+{{ form.media.js }}
 </body>
 </html>

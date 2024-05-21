@@ -31,3 +31,4 @@ txaio==23.1.1
 typing_extensions==4.9.0
 urllib3==2.2.1
 zope.interface==6.2
+django-select2==8.1.2

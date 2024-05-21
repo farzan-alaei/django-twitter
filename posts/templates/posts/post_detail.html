@@ -42,7 +42,7 @@
         </div>
     </form>
     {% for image in post.images.all %}
-        <img src="{{ image.image.url }}" class="img-fluid mt-3" alt="{{ image.alt }}">
+        <img src="{{ image.image.url }}" class="img-fluid w-50 mt-3" alt="{{ image.alt }}">
     {% endfor %}
 
     <!-- Comments -->

@@ -21,6 +21,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('select2/', include('django_select2.urls')),
     path('accounts/', include('accounts.urls')),
     path('chat/', include('chatapp.urls')),
     path('posts/', include('posts.urls')),

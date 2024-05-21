@@ -7,22 +7,25 @@ from django.db.models import Count
 # Create your models here.
 class Post(models.Model):
     class Status(models.TextChoices):
-        DRAFT = 'D', _('Draft')
-        PUBLISHED = 'P', _('Published')
+        DRAFT = "D", _("Draft")
+        PUBLISHED = "P", _("Published")
 
     class Meta:
         verbose_name = _("Post")
         verbose_name_plural = _("Posts")
 
-    title = models.CharField(verbose_name=_('title'), max_length=255)
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='posts')
-    content = models.TextField(verbose_name=_('content'), blank=True)
-    status = models.CharField(verbose_name=_('status'),
-                              max_length=1,
-                              choices=Status.choices,
-                              default=Status.PUBLISHED,
-                              )
-    tags = models.ManyToManyField('Tag', related_name='posts', blank=True)
+    title = models.CharField(verbose_name=_("title"), max_length=255)
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="posts"
+    )
+    content = models.TextField(verbose_name=_("content"), blank=True)
+    status = models.CharField(
+        verbose_name=_("status"),
+        max_length=1,
+        choices=Status.choices,
+        default=Status.PUBLISHED,
+    )
+    tags = models.ManyToManyField("Tag", related_name="posts", blank=True)
     archived = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -38,16 +41,20 @@ class Post(models.Model):
 
 class Reaction(models.Model):
     user = models.ForeignKey(User, verbose_name=_("user"), on_delete=models.CASCADE)
-    related_post = models.ForeignKey(Post, verbose_name=_("Post"), on_delete=models.CASCADE)
+    related_post = models.ForeignKey(
+        Post, verbose_name=_("Post"), on_delete=models.CASCADE
+    )
     liked = models.BooleanField(default=False)
     disliked = models.BooleanField(default=False)
 
 
 class Comment(models.Model):
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
-    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE)
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
     content = models.TextField()
-    reply_to = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+    reply_to = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -56,15 +63,17 @@ class Comment(models.Model):
 
 
 class Image(models.Model):
-    post = models.ForeignKey('Post', verbose_name=_('post'), on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='post/image/')
-    is_featured = models.BooleanField(verbose_name=_('is featured'), default=False)
-    alt = models.CharField(verbose_name=_('alternative'), max_length=100, blank=True)
+    post = models.ForeignKey(
+        "Post", verbose_name=_("post"), on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="post/image/")
+    is_featured = models.BooleanField(verbose_name=_("is featured"), default=False)
+    alt = models.CharField(verbose_name=_("alternative"), max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-is_featured', '-created_at']
+        ordering = ["-is_featured", "-created_at"]
 
 
 class Tag(models.Model):
@@ -77,5 +86,5 @@ class Tag(models.Model):
 
 
 class PostTagFollow(models.Model):
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
-    tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE)
+    tag = models.ForeignKey("Tag", on_delete=models.CASCADE)
